@@ -1,3 +1,7 @@
+if(process.env.NODE_ENV !== 'production'){
+  require('dotenv').config();
+}
+
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 
@@ -24,16 +28,17 @@ app.use(express.urlencoded({
 //set view engine:
 app.set("view engine", "ejs");
 
-const dbURI =
-  "mongodb+srv://dinesh19:c2zjkgKvCxxTaHZp@nodetuts.djld1.mongodb.net/codedojo?retryWrites=true&w=majority";
-mongoose
-  .connect(dbURI, {
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/LMS_Project';
+
+
+  mongoose
+  .connect(dbUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
     useFindAndModify: false
   })
-  .then((result) => app.listen(port))
+  .then(() => {console.log("Connected to MongoDB");})
   .catch((err) => console.log(err));
 
 app.get("*", checkUser);
@@ -62,3 +67,7 @@ app.get("/usertasks", (req, res) => {
 });
 
 app.use(authRoutes);
+
+app.listen(port , ()=>{
+  console.log(`Listening on ${port}`);
+})
