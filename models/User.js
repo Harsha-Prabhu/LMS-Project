@@ -31,7 +31,15 @@ const userSchema = new mongoose.Schema({
     },
     imageURL:{
         type: String
-    }
+    },
+
+    tasks: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Task'
+        }
+    ]
+       
     
 });
 
@@ -63,6 +71,6 @@ userSchema.statics.login = async function(email,password){
     throw Error('incorrect email')
 }
 
-const User = mongoose.model('user',userSchema);
+const User = mongoose.model('User',userSchema);
 
 module.exports= User;

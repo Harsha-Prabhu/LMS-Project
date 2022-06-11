@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const authController = require('../controllers/authController')
+const {requireAuth} = require('../middleware/authMiddleware')
 
 
 const router = Router();
@@ -20,8 +21,8 @@ router.get('/jcourse',authController.jcourse_get);
 router.get('/profile',authController.profile_get);
 router.put('/profile',authController.profile_put);
 
-router.get('/addtask',authController.addtask_get);
-router.post('/addtask',authController.addtask_post);
+router.get('/addtask',requireAuth, authController.addtask_get);
+router.post('/addtask',requireAuth, authController.addtask_post);
 
 router.delete('/usertasks/:id',authController.delete_task);
 router.put('/usertasks/:id',authController.update_task);

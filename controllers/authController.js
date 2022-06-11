@@ -100,7 +100,7 @@ module.exports.profile_get = (req, res) => {
   res.render("profile", { title: "Profile" });
 };
 
-module.exports.profile_put = (req, res) => {
+module.exports.profile_put = (req, res, next) => {
   const { name, role, pno, id, imageURL } =req.body;
   //console.log(req.body);
    
@@ -108,7 +108,7 @@ module.exports.profile_put = (req, res) => {
   .then((result)=>{
     res.json({redirect: '/profile'});
   })
-  .catch((err)=>console.log(err))
+  .catch((err)=>next(err))
 
   // res.render("profile", { title: "Profile" });
 };
@@ -117,36 +117,40 @@ module.exports.addtask_get = (req, res) => {
   res.render("addtask", { title: "Add Task" });
 };
 
-module.exports.addtask_post = async (req, res) => {
+module.exports.addtask_post = async (req, res, next) => {
   
+  try{
+    req.body.status = req.body.status == "on" ? true : false;
 
-  req.body.status = req.body.status == "on" ? true : false;
 
+    const new_task = new Task(req.body);
+    const user = await User.findById(res.locals.user._id);
+    user.tasks.push(new_task);
+    await user.save()
+    await new_task.save()
+    res.redirect('/usertasks')
+  }catch(err){
+    next(err)
+  }
 
-  const new_task = new Task(req.body);
-  new_task.save()
-    .then((result) => {
-      
-      res.redirect("/usertasks");
-    })
-    .catch((err) => console.log(err));
+  
 
   // res.redirect("/usertasks");
 };
 
-module.exports.delete_task = (req,res)=>{
+module.exports.delete_task = async (req,res, next)=>{
   const id = req.params.id;
-
+  await User.findByIdAndUpdate(res.locals.user._id, {$pull: {tasks: id}});
   Task.findByIdAndDelete(id)
   .then(result=>{
-    res.json({ redirect:'/usertasks' })
+    res.json({redirect: '/usertasks'})
   })
   .catch(err=>{
-    console.log(err);
+    next(err);
   })
 }
 
-module.exports.update_task = (req,res)=>{
+module.exports.update_task = async (req,res,next)=>{
   const id = req.params.id;
   Task.findById(id)
   .then((result)=>{
@@ -157,7 +161,7 @@ module.exports.update_task = (req,res)=>{
     res.json({ redirect:'/usertasks' })
   })
   .catch(err=>{
-    console.log(err);
+    next(err)
   })
 })
   
